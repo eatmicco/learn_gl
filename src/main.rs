@@ -9,15 +9,17 @@ mod component;
 mod system;
 mod rendering;
 mod resource;
+mod common;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use std::time::{Duration, Instant};
 use specs::{Builder, World, WorldExt, RunNow, DispatcherBuilder};
-use glm::{vec3, vec4};
+use glm::{vec1, vec3, vec4};
 use crate::component::{Transform, Mesh, Material, Sprite, Spritesheet, AnimatedSprite};
 use crate::resource::{Projection, Camera, Keyboard, KeycodeEx, DeltaTime};
 use crate::system::{InitRender, InitSprite, InitAnimatedSprite, UpdateAnimatedSprite, Render, KeyboardInput};
+use crate::common::deg2rad;
 
 fn main() -> Result<(), String> {
     let sdl_context = sdl2::init()?;
@@ -78,7 +80,11 @@ fn main() -> Result<(), String> {
     //     })
     //     .build();
     world.create_entity()
-        .with(Transform { position: vec3(100., 100., 0.) })
+        .with(Transform { 
+            position: vec3(100., 100., 0.),
+            rotation_rad: deg2rad(90.),
+            scale: vec3(0.5, 0.5, 0.5)
+         })
         .with(Sprite { 
             image_name: "tower.png".to_string(), 
             rect: vec4(0., 0., 205., 198.)
@@ -91,7 +97,11 @@ fn main() -> Result<(), String> {
         vec4(32., 256., 224., 224.),
     ];
     world.create_entity()
-        .with(Transform { position: vec3(300., 300., 0.) })
+        .with(Transform { 
+            position: vec3(300., 300., 0.),
+            rotation_rad: deg2rad(-90.),
+            scale: vec3(0.5, 0.5, 0.5)
+         })
         .with(Spritesheet {
             image_name: "tileset.png".to_string(),
             rects: rect_anims.clone() 

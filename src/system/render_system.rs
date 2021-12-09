@@ -1,5 +1,5 @@
 use specs::{Read, ReadStorage, WriteStorage, System, Entities};
-use glm::vec2;
+use glm::{vec2, vec3};
 use crate::component::{Mesh, Material, Transform, Sprite, AnimatedSprite, Spritesheet};
 use crate::rendering::{
     load_cstring,
@@ -236,7 +236,9 @@ impl<'a> System<'a> for Render {
         let view_matrix = glm::translation(&camera.0);
         for (transform, mesh, material) in (&transform, &mesh, &material).join() {
 
-            let model_matrix = glm::translation(&transform.position);
+            let mut model_matrix = glm::translation(&transform.position);
+            model_matrix = glm::rotate(&model_matrix, transform.rotation_rad, &vec3(0., 0., 1.));
+            model_matrix = glm::scale(&model_matrix, &transform.scale);
             let mvp = projection.0 * view_matrix * model_matrix;
             bind_texture(gl::TEXTURE0, material.texture.index);
 
