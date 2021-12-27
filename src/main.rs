@@ -4,6 +4,9 @@ extern crate nalgebra as na;
 extern crate nalgebra_glm as glm;
 extern crate num_traits;
 extern crate gl;
+extern crate imgui;
+extern crate imgui_sdl2;
+extern crate imgui_opengl_renderer;
 
 mod component;
 mod system;
@@ -39,6 +42,12 @@ fn main() -> Result<(), String> {
 
     let _gl_context = window.gl_create_context()?;
     let _gl = gl::load_with(|s| video_subsystem.gl_get_proc_address(s) as *const std::os::raw::c_void);
+
+    let mut imgui = imgui::Context::create();
+    imgui.set_ini_filename(None);
+
+    let mut imgui_sdl2 = imgui_sdl2::ImguiSdl2::new(&mut imgui, &window);
+    let imgui_renderer = imgui_opengl_renderer::Renderer::new(&mut imgui, |s| video_subsystem.gl_get_proc_address(s) as _);
 
     let mut world = World::new();
     world.register::<Transform>();
@@ -151,6 +160,9 @@ fn main() -> Result<(), String> {
         let mut keyboard = Keyboard::default();
 
         for event in event_pump.poll_iter() {
+            imgui_sdl2.handle_event(&mut imgui, &event);
+            if imgui_sdl2.ignore_event(&event) { continue; }
+
             match event {
                 Event::Quit { .. }
                 | Event::KeyDown {
@@ -177,8 +189,18 @@ fn main() -> Result<(), String> {
 
         *world.write_resource::<Keyboard>() = keyboard;
 
+        imgui_sdl2.prepare_frame(imgui.io_mut(), &window, &event_pump.mouse_state());
+
+        imgui.io_mut().delta_time = delta.as_secs() as f32 + delta.subsec_nanos() as f32 / 1_000_000_000.0;
+        
+        let ui = imgui.frame();
+        ui.show_demo_window(&mut true);
+
         dispatcher.dispatch(&mut world);
         world.maintain();
+
+        imgui_sdl2.prepare_render(&ui, &window);
+        imgui_renderer.render(ui);
 
         window.gl_swap_window();
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60))
