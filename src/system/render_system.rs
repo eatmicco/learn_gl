@@ -12,7 +12,7 @@ use crate::rendering::{
     bind_vertex_array,
     vertex_attrib_pointer,
     unbind_vertex_array,
-    bind_texture,
+    bind_texture_unit,
     unbind_texture,
     bind_buffer,
     unbind_buffer,
@@ -98,7 +98,7 @@ impl<'a> System<'a> for Render {
             model_matrix = glm::rotate(&model_matrix, transform.rotation_rad, &vec3(0., 0., 1.));
             model_matrix = glm::scale(&model_matrix, &transform.scale);
             let mvp = projection.0 * view_matrix * model_matrix;
-            bind_texture(gl::TEXTURE0, material.texture.index);
+            bind_texture_unit(gl::TEXTURE0, material.texture.index);
 
             use_program(material.program);
             set_mvp_to_program(&mvp, material.program, "MVPMatrix");

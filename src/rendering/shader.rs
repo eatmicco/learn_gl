@@ -60,6 +60,16 @@ pub fn get_uniform_location(program: gl::types::GLuint, name: &str) -> Result<gl
     Ok(uniform_location)
 }
 
+pub fn get_attrib_location(program: gl::types::GLuint, name: &str) -> Result<gl::types::GLint, String> {
+    let c_name = CString::new(name).unwrap();
+    let attrib_location: gl::types::GLint;
+    unsafe {
+        attrib_location = gl::GetAttribLocation(program, c_name.as_ptr() as *const gl::types::GLchar);
+    }
+    
+    Ok(attrib_location)
+}
+
 pub fn shader_from_source(source: &CStr, kind: gl::types::GLuint) -> Result<gl::types::GLuint, String> {
    let id = unsafe { gl::CreateShader(kind) };
 
